@@ -1,0 +1,24 @@
+//
+//  ContentView.swift
+//  BeReal
+//
+//  Created by Nishan Narain on 2/12/26.
+//
+
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Image(systemName: "globe")
+                .imageScale(.large)
+                .foregroundStyle(.tint)
+            Text("BeReal.")
+        }
+        .padding()
+    }
+}
+
+#Preview {
+    ContentView()
+}
