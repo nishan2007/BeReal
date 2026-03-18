@@ -18,5 +18,12 @@ struct Post: ParseObject {
     var caption: String?
     var user: User?
     
+    
+    // Pt2 location data
+    var latitude: Double?
+    var longitude: Double?
+    var locationName: String?
+    
+    
     static var className: String {"Post"}
 }

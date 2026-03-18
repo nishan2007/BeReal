@@ -281,9 +281,11 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L5L4MT7GXL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BeReal/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access so you can post a BeReal photo";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs acess to your photos to upload posts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -315,9 +317,11 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = L5L4MT7GXL;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BeReal/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "This app needs camera access so you can post a BeReal photo";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs acess to your photos to upload posts";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
