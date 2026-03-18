@@ -16,7 +16,7 @@ struct Post: ParseObject {
     
     var imageFile: ParseFile?
     var caption: String?
-    var User: User?
+    var user: User?
     
     static var className: String {"Post"}
 }
