@@ -34,7 +34,23 @@ struct PostRow: View {
                 Text(caption)
                     .font(.body)
             }
+            HStack(spacing: 6) {
+                Label(timeAgoString(from: post.createdAt), systemImage: "clock")
+
+                if let locationName = post.locationName, !locationName.isEmpty {
+                    Label(locationName, systemImage: "location")
+                }
+            }
+            .font(.caption)
+            .foregroundColor(.secondary)
         }
         .padding(.vertical, 8)
     }
+}
+private func timeAgoString(from date: Date?) -> String {
+    guard let date = date else { return "Unknown time" }
+
+    let formatter = RelativeDateTimeFormatter()
+    formatter.unitsStyle = .abbreviated
+    return formatter.localizedString(for: date, relativeTo: Date())
 }

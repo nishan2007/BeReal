@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ParseSwift
+import CoreLocation
 
 struct CreatePostView: View {
     @State private var selectedImage: UIImage?
@@ -17,6 +18,9 @@ struct CreatePostView: View {
     @State private var statusText: String?
     @State private var didUploadSucceed = false
     @State private var showingSourceDialog = false
+    @StateObject private var locationManager = PostLocationManager()
+    @State private var photoLocation: CLLocation?
+    @State private var photoLocationName: String?
 
     var body: some View {
         NavigationStack {
@@ -48,6 +52,34 @@ struct CreatePostView: View {
                 TextField("Caption (optional)", text: $caption)
                     .textFieldStyle(.roundedBorder)
 
+                // Location
+                HStack(spacing: 8) {
+                    Image(systemName: "location")
+                        .foregroundColor(.secondary)
+
+                    if let photoLocationName, !photoLocationName.isEmpty {
+                        Text(photoLocationName)
+                            .foregroundColor(.secondary)
+                    } else if photoLocation != nil {
+                        Text("Photo location found")
+                            .foregroundColor(.secondary)
+                    } else if let locationName = locationManager.locationName, !locationName.isEmpty {
+                        Text(locationName)
+                            .foregroundColor(.secondary)
+                    } else if locationManager.currentLocation != nil {
+                        Text("Current location found")
+                            .foregroundColor(.secondary)
+                    } else if let locationError = locationManager.locationError {
+                        Text(locationError)
+                            .foregroundColor(.red)
+                    } else {
+                        Text("Getting location...")
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+                }
+
                 // Status
                 if let statusText {
                     Text(statusText)
@@ -66,14 +98,18 @@ struct CreatePostView: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(selectedImage == nil || isUploading)
+                .disabled(selectedImage == nil || isUploading || (photoLocation == nil && locationManager.currentLocation == nil))
 
                 Spacer()
             }
             .padding()
             .navigationTitle("New Post")
             .sheet(isPresented: $showPicker) {
-                PhotoPicker(image: $selectedImage, sourceType: pickerSourceType)
+                PhotoPicker(
+                    image: $selectedImage,
+                    photoLocation: $photoLocation,
+                    sourceType: pickerSourceType
+                )
             }
             .confirmationDialog("Select Photo Source", isPresented: $showingSourceDialog, titleVisibility: .visible) {
                 Button("Take Photo") {
@@ -96,6 +132,14 @@ struct CreatePostView: View {
                     statusText = nil
                     didUploadSucceed = false
                 }
+                locationManager.requestLocationAccessAndFetch()
+            }
+            .onChange(of: photoLocation) { _, newValue in
+                if let newValue {
+                    resolvePhotoLocationName(from: newValue)
+                } else {
+                    photoLocationName = nil
+                }
             }
         }
     }
@@ -103,7 +147,35 @@ struct CreatePostView: View {
     private func showSourceOptions() {
         statusText = nil
         didUploadSucceed = false
+        photoLocation = nil
+        photoLocationName = nil
+        locationManager.requestLocation()
         showingSourceDialog = true
+    }
+
+    private func resolvePhotoLocationName(from location: CLLocation) {
+        let geocoder = CLGeocoder()
+        geocoder.reverseGeocodeLocation(location) { placemarks, _ in
+            DispatchQueue.main.async {
+                if let placemark = placemarks?.first {
+                    let city = placemark.locality
+                    let state = placemark.administrativeArea
+                    let country = placemark.country
+
+                    if let city, let state {
+                        photoLocationName = "\(city), \(state)"
+                    } else if let city, let country {
+                        photoLocationName = "\(city), \(country)"
+                    } else if let name = placemark.name {
+                        photoLocationName = name
+                    } else {
+                        photoLocationName = nil
+                    }
+                } else {
+                    photoLocationName = nil
+                }
+            }
+        }
     }
 
     private func uploadPost() {
@@ -120,6 +192,8 @@ struct CreatePostView: View {
             return
         }
 
+        let finalLocation = photoLocation ?? locationManager.currentLocation
+
         isUploading = true
         didUploadSucceed = false
         statusText = nil
@@ -130,6 +204,12 @@ struct CreatePostView: View {
         post.imageFile = file
         post.caption = caption.trimmingCharacters(in: .whitespacesAndNewlines)
         post.user = currentUser
+        if let finalLocation {
+            post.latitude = finalLocation.coordinate.latitude
+            post.longitude = finalLocation.coordinate.longitude
+        }
+
+        post.locationName = photoLocationName ?? locationManager.locationName
 
         post.save { result in
             DispatchQueue.main.async {
@@ -141,6 +221,8 @@ struct CreatePostView: View {
                     statusText = "✅ Uploaded!"
                     selectedImage = nil
                     caption = ""
+                    photoLocation = nil
+                    photoLocationName = nil
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         if statusText == "✅ Uploaded!" {
                             statusText = nil
