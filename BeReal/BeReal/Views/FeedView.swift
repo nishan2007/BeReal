@@ -25,8 +25,17 @@ struct FeedView: View {
                 } else {
                     List(posts, id: \.objectId) { post in
                         ZStack {
-                            PostRow(post: post)
-                                .blur(radius: shouldHidePost(post) ? 20 : 0)
+                            if shouldHidePost(post) {
+                                PostRow(post: post)
+                                    .blur(radius: 20)
+                            } else {
+                                NavigationLink {
+                                    PostDetailView(post: post)
+                                } label: {
+                                    PostRow(post: post)
+                                }
+                                .buttonStyle(.plain)
+                            }
 
                             if shouldHidePost(post) {
                                 VStack(spacing: 8) {
@@ -43,7 +52,8 @@ struct FeedView: View {
                                 .cornerRadius(12)
                                 .padding()
                             }
-                        }                    }
+                        }
+                    }
                 }
             }
             .navigationTitle("Feed")
